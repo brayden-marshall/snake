@@ -12,8 +12,8 @@ import (
 const (
 	windowWidth    = 800
 	windowHeight   = 800
-	gridWidth      = 50.0
-	gridHeight     = 50.0
+	gridWidth      = 40.0
+	gridHeight     = 40.0
 	widthInterval  = float64(windowWidth / gridWidth)
 	heightInterval = float64(windowHeight / gridHeight)
 )
@@ -29,9 +29,8 @@ const (
 )
 
 func newApple(random *rand.Rand) pixel.Rect {
-	// FIXME: apple can currently spawn on top of snake
-	minX := float64(random.Intn(gridWidth-1)) * widthInterval
-	minY := float64(random.Intn(gridHeight-1)) * heightInterval
+	minX := 10 * widthInterval
+	minY := 10 * heightInterval
 	return pixel.R(minX, minY, minX+widthInterval, minY+heightInterval)
 }
 
@@ -42,10 +41,30 @@ func drawApple(apple pixel.Rect, imd *imdraw.IMDraw) {
 	imd.Rectangle(0)
 }
 
-func moveApple(apple *pixel.Rect, random *rand.Rand) {
-	// FIXME: apple can currently spawn on top of snake
-	newX := float64(random.Intn(gridWidth-1)) * widthInterval
-	newY := float64(random.Intn(gridHeight-1)) * heightInterval
+func moveApple(apple *pixel.Rect, random *rand.Rand, snake Snake) {
+	// two sets containing information about all invalid locations to move the apple
+	invalidX := make(map[int]bool)
+	invalidY := make(map[int]bool)
+	for _, cell := range snake.Body {
+		invalidX[int(cell.Min.X)] = true
+		invalidY[int(cell.Min.Y)] = true
+	}
+
+	// two slices containing information about all valid locations to move the apple
+	var validX, validY []float64
+	for i := 0.0; i < gridWidth; i++ {
+		if !invalidX[int(i*widthInterval)] {
+			validX = append(validX, i*widthInterval)
+		}
+	}
+	for i := 0.0; i < gridHeight; i++ {
+		if !invalidY[int(i*heightInterval)] {
+			validY = append(validY, i*heightInterval)
+		}
+	}
+
+	newX := validX[random.Intn(len(validX))]
+	newY := validY[random.Intn(len(validY))]
 	*apple = pixel.R(newX, newY, newX+widthInterval, newY+heightInterval)
 }
 
@@ -109,7 +128,7 @@ func run() {
 		if snake.Body[0].Min == apple.Min {
 			snake.Grow(2)
 			score++
-			moveApple(&apple, randomGen)
+			moveApple(&apple, randomGen, snake)
 		}
 
 		dt += time.Since(start)
