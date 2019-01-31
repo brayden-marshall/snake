@@ -50,7 +50,7 @@ func moveApple(apple *pixel.Rect, random *rand.Rand, snake Snake) {
 		invalidY[int(cell.Min.Y)] = true
 	}
 
-	// FIXME: crashes when snake has a cell in either every X or every Y position
+	// finding all valid positions that we can move the apple
 	var validPositions []pixel.Vec
 	for i := 0.0; i < gridWidth; i++ {
 		for j := 0.0; j < gridHeight; j++ {
@@ -62,6 +62,7 @@ func moveApple(apple *pixel.Rect, random *rand.Rand, snake Snake) {
 		}
 	}
 
+	// picking a random spot to move the apple
 	newPosition := validPositions[random.Intn(len(validPositions))]
 	newX := newPosition.X
 	newY := newPosition.Y
