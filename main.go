@@ -50,21 +50,21 @@ func moveApple(apple *pixel.Rect, random *rand.Rand, snake Snake) {
 		invalidY[int(cell.Min.Y)] = true
 	}
 
-	// two slices containing information about all valid locations to move the apple
-	var validX, validY []float64
+	// FIXME: crashes when snake has a cell in either every X or every Y position
+	var validPositions []pixel.Vec
 	for i := 0.0; i < gridWidth; i++ {
-		if !invalidX[int(i*widthInterval)] {
-			validX = append(validX, i*widthInterval)
-		}
-	}
-	for i := 0.0; i < gridHeight; i++ {
-		if !invalidY[int(i*heightInterval)] {
-			validY = append(validY, i*heightInterval)
+		for j := 0.0; j < gridHeight; j++ {
+			x := i * widthInterval
+			y := j * heightInterval
+			if !invalidX[int(x)] || !invalidY[int(y)] {
+				validPositions = append(validPositions, pixel.V(x, y))
+			}
 		}
 	}
 
-	newX := validX[random.Intn(len(validX))]
-	newY := validY[random.Intn(len(validY))]
+	newPosition := validPositions[random.Intn(len(validPositions))]
+	newX := newPosition.X
+	newY := newPosition.Y
 	*apple = pixel.R(newX, newY, newX+widthInterval, newY+heightInterval)
 }
 
@@ -126,7 +126,7 @@ func run() {
 
 		// if snake has eaten apple
 		if snake.Body[0].Min == apple.Min {
-			snake.Grow(2)
+			snake.Grow(10)
 			score++
 			moveApple(&apple, randomGen, snake)
 		}
