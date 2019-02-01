@@ -127,7 +127,7 @@ func run() {
 
 		// if snake has eaten apple
 		if snake.Body[0].Min == apple.Min {
-			snake.Grow(10)
+			snake.Grow(2)
 			score++
 			moveApple(&apple, randomGen, snake)
 		}
